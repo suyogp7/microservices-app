@@ -8,14 +8,17 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main',
+                    url: 'https://github.com/suyogp7/microservices-app.git',
+                    credentialsId: 'github-creds'
             }
         }
 
         stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    // Using --password instead of --password-stdin to bypass 'pass' helper
+                    sh 'docker login -u $DOCKER_USER --password $DOCKER_PASS'
                 }
             }
         }
