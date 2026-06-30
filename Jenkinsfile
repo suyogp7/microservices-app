@@ -17,8 +17,11 @@ pipeline {
         stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    // Using --password instead of --password-stdin to bypass 'pass' helper
-                    sh 'docker login -u $DOCKER_USER --password $DOCKER_PASS'
+                    sh '''
+                        mkdir -p /tmp/.docker
+                        echo '{"auths":{}}' > /tmp/.docker/config.json
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin --config /tmp/.docker
+                    '''
                 }
             }
         }
