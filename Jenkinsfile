@@ -45,7 +45,6 @@ pipeline {
 
         stage('Push Images') {
             steps {
-                // Grouped inside one script block for cleaner pipeline runtime execution
                 sh '''
                     docker push $REGISTRY/orders-service:1.1
                     docker push $REGISTRY/payments-service:1.1
@@ -57,6 +56,26 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh 'kubectl apply -f k8s/ --validate=false'
+            }
+        }
+
+        stage('Verify Services Health') {
+            steps {
+                script {
+                    echo 'Waiting 15 seconds for Kubernetes Pod rollouts to settle...'
+                    sleep 15
+
+                    // 1. Print current cluster pods to the console logs
+                    sh 'kubectl get pods'
+
+                    // 2. Internal ping from Frontend pod to Orders Service
+                    echo 'Testing Orders API internal routing...'
+                    sh 'kubectl exec deployment/frontend-deployment -- wget -qO- http://orders-service:3000/orders'
+
+                    // 3. Internal ping from Frontend pod to Payments Service
+                    echo 'Testing Payments API internal routing...'
+                    sh 'kubectl exec deployment/frontend-deployment -- wget -qO- http://payments-service:3001/payments'
+                }
             }
         }
     }
