@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+        // Defines your global repository target registry namespace
         REGISTRY = "docker.io/suyog2306"
     }
 
@@ -18,7 +19,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh '''
-                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin || true
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
                     '''
                 }
             }
@@ -26,27 +27,30 @@ pipeline {
 
         stage('Build Orders Service') {
             steps {
-                sh 'docker build -t $REGISTRY/orders-service:1.0 ./orders'
+                sh 'docker build -t $REGISTRY/orders-service:1.1 ./orders'
             }
         }
 
         stage('Build Payments Service') {
             steps {
-                sh 'docker build -t $REGISTRY/payments-service:1.0 ./payments'
+                sh 'docker build -t $REGISTRY/payments-service:1.1 ./payments'
             }
         }
 
         stage('Build Frontend Service') {
             steps {
-                sh 'docker build -t $REGISTRY/frontend-service:1.0 ./frontend'
+                sh 'docker build -t $REGISTRY/frontend-service:1.1 ./frontend'
             }
         }
 
         stage('Push Images') {
             steps {
-                sh 'docker push $REGISTRY/orders-service:1.0'
-                sh 'docker push $REGISTRY/payments-service:1.0'
-                sh 'docker push $REGISTRY/frontend-service:1.0'
+                // Grouped inside one script block for cleaner pipeline runtime execution
+                sh '''
+                    docker push $REGISTRY/orders-service:1.1
+                    docker push $REGISTRY/payments-service:1.1
+                    docker push $REGISTRY/frontend-service:1.1
+                '''
             }
         }
 
