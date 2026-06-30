@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: payments
-        image: suyog/payments-service:latest
+        image: suyog2306/payments-service:1.0
         ports:
         - containerPort: 3001
 ---

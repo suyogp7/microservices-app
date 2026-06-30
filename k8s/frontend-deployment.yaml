@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: suyog/frontend-service:latest
+        image: suyog2306/frontend-service:1.0
         ports:
         - containerPort: 3002
 ---
